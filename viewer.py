@@ -2,6 +2,8 @@
 import cv2
 import numpy as np
 
+## Ok
+
 class MazeViewer():
     START_COLOR = (0, 255, 0)
     GOAL_COLOR = (255, 0, 0)

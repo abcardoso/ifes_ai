@@ -5,7 +5,7 @@ from collections import deque
 from viewer import MazeViewer
 from math import inf, sqrt
 
-
+## Ok
 
 def gera_labirinto(n_linhas, n_colunas, inicio, goal):
     # cria labirinto vazio
