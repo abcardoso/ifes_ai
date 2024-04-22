@@ -148,8 +148,45 @@ def breadth_first_search(labirinto, inicio, goal, viewer):
 
 
 def depth_first_search(labirinto, inicio, goal, viewer):
-    # remova o comando abaixo e coloque o codigo DFS aqui
-    pass
+    # nós gerados e que podem ser expandidos, já inicializado apendando com [inicio]
+    fronteira = deque([inicio])
+    # nós já expandidos
+    expandidos = set()
+
+    # Goal
+    goal_encontrado = None
+
+    while (len(fronteira) > 0) and (goal_encontrado is None):
+        # Seleciona o nó adicionado mais recentemente para expandir (comportamento da pilha)
+        no_atual = fronteira.pop()  # Usando pop para remover da direita emulando pilha
+
+        # verifica se atingimos o Goal
+        if no_atual.y == goal.y and no_atual.x == goal.x:
+            goal_encontrado = no_atual
+            break
+
+        # se ainda nao foi expandido
+        if not esta_contido(expandidos, no_atual):
+            # marca o nó atual como expandido
+            expandidos.add(no_atual)
+
+            # celulas vizinhas livres
+            vizinhos = celulas_vizinhas_livres(no_atual, labirinto)
+
+            # Adicione vizinhos não visitados e que não estão na fronteira a pilha
+            for v in vizinhos:
+                if not esta_contido(expandidos, v) and not esta_contido(fronteira, v):
+                    fronteira.append(v)  # usando append
+
+            # Atualiza o viewer (lembrar de comentar quando for gerar as estatísticas)
+            viewer.update(generated=fronteira, expanded=expandidos)
+            #viewer.pause()
+
+    # retrona as infos
+    caminho = obtem_caminho(goal_encontrado)
+    custo = custo_caminho(caminho)
+
+    return caminho, custo, expandidos
 
 
 def a_star_search(labirinto, inicio, goal, viewer):
@@ -183,7 +220,7 @@ def main():
         #----------------------------------------
         # BFS Search
         #----------------------------------------
-        viewer._figname = "BFS"
+        viewer._figname = "BFS" 
         caminho, custo_total, expandidos = \
                 breadth_first_search(labirinto, INICIO, GOAL, viewer)
 
@@ -205,6 +242,23 @@ def main():
         #----------------------------------------
         # DFS Search
         #----------------------------------------
+        viewer._figname = "DFS" 
+        caminho, custo_total, expandidos = \
+                depth_first_search(labirinto, INICIO, GOAL, viewer)
+
+        if len(caminho) == 0:
+            print("Goal é inalcançavel neste labirinto.")
+
+        print(
+            f"DFS:"
+            f"\tCusto total do caminho: {custo_total}.\n"
+            f"\tNumero de passos: {len(caminho)-1}.\n"
+            f"\tNumero total de nos expandidos: {len(expandidos)}.\n\n"
+
+        )
+
+        viewer.update(path=caminho)
+        viewer.pause()
 
         #----------------------------------------
         # A-Star Search
