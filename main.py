@@ -190,17 +190,52 @@ def depth_first_search(labirinto, inicio, goal, viewer):
 
 
 def a_star_search(labirinto, inicio, goal, viewer):
-    # remova o comando abaixo e coloque o codigo A-star aqui
-    pass
+    fronteira = [(heuristic(inicio, goal), inicio)]
+    origin = {inicio: None}
+    g_score = {inicio: 0}
+    expandidos = set()
 
+    while fronteira:
+        fronteira.sort(key=lambda x: x[0])
+        current_f, no_atual = fronteira.pop(0)
 
+        # Update the viewer with the current state before potential goal check
+        viewer.update(generated=[n for f, n in fronteira], expanded=list(expandidos))
 
-#-------------------------------
+        if no_atual == goal:
+            caminho_final = obtem_caminho(goal)
+            viewer.update(path=caminho_final)  # Display the final path
+            return caminho_final, len(expandidos)
+
+        expandidos.add(no_atual)
+
+        for v in celulas_vizinhas_livres(no_atual, labirinto):
+            if v in expandidos:
+                continue
+
+            tentative_g_score = g_score[no_atual] + distancia(no_atual, v)
+            if v not in g_score or tentative_g_score < g_score[v]:
+                origin[v] = no_atual
+                g_score[v] = tentative_g_score
+                f_score = tentative_g_score + heuristic(v, goal)
+                if not any(v == n for f, n in fronteira):
+                    fronteira.append((f_score, v))
+
+    return [], len(expandidos)  # No path found
+
+def heuristic(celula_1, celula_2):
+    # Heurística de distância de Manhattan
+    return abs(celula_1.x - celula_2.x) + abs(celula_1.y - celula_2.y)
+
+def distancia(celula_1, celula_2):
+    dx = celula_1.x - celula_2.x
+    dy = celula_1.y - celula_2.y
+    return sqrt(dx ** 2 + dy ** 2)
 
 
 def main():
     for _ in range(10):
-        #SEED = 42  # coloque None no lugar do 42 para deixar aleatorio
+        SEED = 21  # coloque None no lugar do 42 para deixar aleatorio
         #random.seed(SEED)
         N_LINHAS  = 10
         N_COLUNAS = 20
@@ -263,7 +298,23 @@ def main():
         #----------------------------------------
         # A-Star Search
         #----------------------------------------
+        viewer._figname = "A_Star" 
+        caminho, custo_total, expandidos = \
+                a_star_search(labirinto, INICIO, GOAL, viewer)
 
+        if len(caminho) == 0:
+            print("Goal é inalcançavel neste labirinto.")
+
+        print(
+            f"DFS:"
+            f"\tCusto total do caminho: {custo_total}.\n"
+            f"\tNumero de passos: {len(caminho)-1}.\n"
+            f"\tNumero total de nos expandidos: {len(expandidos)}.\n\n"
+
+        )
+
+        viewer.update(path=caminho)
+        viewer.pause()
         #----------------------------------------
         # Uniform Cost Search (Obs: opcional)
         #----------------------------------------

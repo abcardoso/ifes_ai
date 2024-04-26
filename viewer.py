@@ -1,5 +1,5 @@
 
-import cv2 # type: ignore
+import cv2 
 import numpy as np
 
 ## Ok
@@ -11,11 +11,12 @@ class MazeViewer():
     GENERATED_COLOR = (0, 0, 255)
     PATH_COLOR = (128, 0, 255)
 
-    def __init__(self, labirinto, start, goal, zoom=5, step_time_miliseconds=-1):
+    def __init__(self, labirinto, start, goal, zoom=5, figname="view", step_time_miliseconds=-1):
         self._labirinto = labirinto
         self._zoom = zoom
         self._step = step_time_miliseconds
         self._start = start
+        self._figname = figname
         self._goal = goal
 
     def update(self, generated=[], expanded=[], path=[]):
@@ -40,7 +41,7 @@ class MazeViewer():
         maze_img = self._increase_image_size(maze_img, zoom=self._zoom)
         self._draw_grid(maze_img, self._zoom)
 
-        cv2.imshow("view", maze_img)
+        cv2.imshow(self._figname, maze_img) # o nome da janela nao esta funcionando
         cv2.waitKey(self._step)
 
     def pause(self) -> None:
