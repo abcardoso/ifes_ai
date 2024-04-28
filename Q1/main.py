@@ -1,8 +1,11 @@
 
 import random
 import time 
+import heapq
 
 from collections import deque
+
+from sympy import true
 from viewer import MazeViewer
 from math import inf, sqrt
 
@@ -35,6 +38,10 @@ class Celula:
         self.anterior = anterior
         self.distancia = 0
         self.custo = 0
+    
+    # Define menor-que para heapq 
+    def __lt__(self, other):
+        return (self.y, self.x) < (other.y, other.x)
 
 
 def distancia(celula_1, celula_2):
@@ -77,7 +84,7 @@ def obtem_caminho(goal):
 
 
 def celulas_vizinhas_livres(celula_atual, labirinto):
-    # generate neighbors of the current state
+    # generate vizinhos of the current state
     vizinhos = [
         Celula(y=celula_atual.y-1, x=celula_atual.x-1, anterior=celula_atual),
         Celula(y=celula_atual.y+0, x=celula_atual.x-1, anterior=celula_atual),
@@ -140,8 +147,7 @@ def breadth_first_search(labirinto, inicio, goal, viewer):
         expandidos.add(no_atual)
 
         if viewer:
-            viewer.update(generated=fronteira,
-                        expanded=expandidos)
+            viewer.update(generated=fronteira, expanded=expandidos)
             #viewer.pause()
 
 
@@ -194,7 +200,7 @@ def depth_first_search(labirinto, inicio, goal, viewer):
     return caminho, custo, expandidos
 
 
-def a_star_search(labirinto, inicio, goal, viewer):
+""" def a_star_search(labirinto, inicio, goal, viewer):
     # nos gerados e que podem ser expandidos (vermelhos)
     fronteira = []
     # nos ja expandidos (amarelos)
@@ -243,7 +249,7 @@ def a_star_search(labirinto, inicio, goal, viewer):
 
         if viewer:
             viewer.update(generated=fronteira,
-                        expanded=expandidos)
+                        expandidos=expandidos)
             #viewer.pause()
 
 
@@ -264,14 +270,72 @@ def custo_caminhoAS(caminho):
     return custo_total
 
 def obtem_caminhoAS(goal, origin):
-    """ construi o caminho do goal para a origem. """
+    #construi o caminho do goal para a origem. 
     caminho = []
     step = goal
     while step is not None:
         caminho.append(step)
         step = origin.get(step)
     caminho.reverse()  #caminho gerado do goal para a origem, então precisamos inverter
-    return caminho
+    return caminho """
+
+
+def a_star_search(labirinto, inicio, goal, viewer):
+    # Configuração inicial: cria uma lista de prioridades para a fronteira de busca
+    open_set = []
+    heapq.heappush(open_set, (heuristic(inicio, goal), inicio))
+    in_open_set = {inicio}
+    origin = {inicio: None}
+    g_score = {inicio: 0}  # Custo do caminho do início até o nó atual
+    f_score = {inicio: heuristic(inicio, goal)}  # Custo estimado do início até o objetivo passando pelo nó
+
+    expandidos = set()  # Conjunto de nós já expandidos
+
+    while open_set:
+        current_f, current = heapq.heappop(open_set)
+        in_open_set.remove(current)
+
+        # Atualiza a janela, se fornecido
+        if viewer:
+            # Converte os itens da fila de prioridade em lista para visualização
+            fronteira_vis = [node for _, node in open_set]
+            viewer.update(generated=fronteira_vis, expanded=list(expandidos))
+            #viewer.pause()
+
+        # Verifica se o nó atual é o objetivo
+        if current.y == goal.y and current.x == goal.x:
+            path = reconstruct_path(current, origin)
+            return path, custo_caminho(path), expandidos
+
+        expandidos.add(current)
+
+        # Explora os vizinhos do nó atual
+        for vizinho in celulas_vizinhas_livres(current, labirinto):
+            if vizinho in expandidos:
+                continue
+
+            # Calcula o custo provisório g do caminho até o vizinho
+            tentative_g_score = g_score[current] + distancia(current, vizinho)
+
+            # Atualiza o custo do vizinho se for menor que o registrado
+            if vizinho not in g_score or tentative_g_score < g_score[vizinho]:
+                origin[vizinho] = current
+                g_score[vizinho] = tentative_g_score
+                f_score[vizinho] = tentative_g_score + heuristic(vizinho, goal)
+                if vizinho not in in_open_set:
+                    heapq.heappush(open_set, (f_score[vizinho], vizinho))
+                    in_open_set.add(vizinho)
+
+    return [], inf, expandidos
+
+def reconstruct_path(current, origin):
+    path = []
+    while current in origin:
+        path.append(current)
+        current = origin[current]
+    path.reverse()  # Inverte
+    return path
+
 
 def heuristic(celula_1, celula_2):
     # Heurística de distância de Manhattan
@@ -284,6 +348,7 @@ def main():
         #random.seed(SEED)
         N_LINHAS  = 10 #10
         N_COLUNAS = 20 #20
+        RENDER = true
         INICIO = Celula(y=0, x=0, anterior=None)
         GOAL   = Celula(y=N_LINHAS-1, x=N_COLUNAS-1, anterior=None)
 
@@ -294,16 +359,18 @@ def main():
         """
         labirinto = gera_labirinto(N_LINHAS, N_COLUNAS, INICIO, GOAL)
 
-        #norender viewer = MazeViewer(labirinto, INICIO, GOAL,
-        #norender                     step_time_miliseconds=1, zoom=10)
-
-        viewer = None #norender para não gastar tempo renderizando
+        if RENDER:
+            viewer = MazeViewer(labirinto, INICIO, GOAL,
+                                step_time_miliseconds=1, zoom=10)
+        else:
+            viewer = None #norender para não gastar tempo renderizando
         
         #----------------------------------------
         # BFS Search
         #----------------------------------------
         
-        #norender viewer._figname = "BFS" 
+        if viewer:
+            viewer._figname = "BFS" 
         
         bfs_start_time = time.time()
         
@@ -323,14 +390,16 @@ def main():
 
         )
 
-        #norender viewer.update(path=caminho)
-        #norender viewer.pause()
+        if viewer:
+            viewer.update(path=caminho)
+            viewer.pause()
 
 
         #----------------------------------------
         # DFS Search
         #----------------------------------------
-        #norender viewer._figname = "DFS" 
+        if viewer:
+            viewer._figname = "DFS" 
         
         dfs_start_time = time.time()
         caminho, custo_total, expandidos = \
@@ -349,13 +418,15 @@ def main():
 
         )
 
-        #norender viewer.update(path=caminho)
-        #norender viewer.pause()
+        if viewer:
+            viewer.update(path=caminho)
+            viewer.pause()
 
         #----------------------------------------
         # A-Star Search
         #----------------------------------------
-        #norender viewer._figname = "A_Star" 
+        if viewer:
+            viewer._figname = "A_Star" 
         
         as_start_time = time.time()
         caminho, custo_total, expandidos = \
@@ -374,8 +445,9 @@ def main():
 
         )
 
-        #norender viewer.update(path=caminho)
-        #norender viewer.pause()
+        if viewer:
+            viewer.update(path=caminho)
+            viewer.pause()
         #----------------------------------------
         # Uniform Cost Search (Obs: opcional)
         #----------------------------------------
