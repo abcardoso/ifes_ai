@@ -41,7 +41,7 @@ class MazeViewer():
         maze_img = self._increase_image_size(maze_img, zoom=self._zoom)
         self._draw_grid(maze_img, self._zoom)
 
-        cv2.imshow(self._figname, maze_img) # o nome da janela nao esta funcionando
+        cv2.imshow(self._figname, maze_img) # o nome da janela esta funcionando
         cv2.waitKey(self._step)
 
     def pause(self) -> None:
