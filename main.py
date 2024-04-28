@@ -12,8 +12,8 @@ def gera_labirinto(n_linhas, n_colunas, inicio, goal):
     labirinto = [[0] * n_colunas for _ in range(n_linhas)]
 
     # adiciona celulas ocupadas em locais aleatorios de
-    # forma que 50% do labirinto esteja ocupado
-    numero_de_obstaculos = int(0.50 * n_linhas * n_colunas)
+    # forma que 40% do labirinto esteja ocupado
+    numero_de_obstaculos = int(0.40 * n_linhas * n_colunas)
     for _ in range(numero_de_obstaculos):
         linha = random.randint(0, n_linhas-1)
         coluna = random.randint(0, n_colunas-1)
@@ -32,6 +32,8 @@ class Celula:
         self.y = y
         self.x = x
         self.anterior = anterior
+        self.distancia = 0
+        self.custo = 0
 
 
 def distancia(celula_1, celula_2):
@@ -190,55 +192,94 @@ def depth_first_search(labirinto, inicio, goal, viewer):
 
 
 def a_star_search(labirinto, inicio, goal, viewer):
-    fronteira = [(heuristic(inicio, goal), inicio)]
-    origin = {inicio: None}
-    g_score = {inicio: 0}
-    expandidos = set()
+    # nos gerados e que podem ser expandidos (vermelhos)
+    fronteira = []
+    # nos ja expandidos (amarelos)
+    expandidos = []
 
-    while fronteira:
-        fronteira.sort(key=lambda x: x[0])
-        current_f, no_atual = fronteira.pop(0)
+    # adiciona o no inicial na fronteira
+    fronteira.append(inicio)
 
-        # Update the viewer with the current state before potential goal check
-        viewer.update(generated=[n for f, n in fronteira], expanded=list(expandidos))
+    # variavel para armazenar o goal quando ele for encontrado.
+    goal_encontrado = None
 
-        if no_atual == goal:
-            caminho_final = obtem_caminho(goal)
-            viewer.update(path=caminho_final)  # Display the final path
-            return caminho_final, len(expandidos)
+    # Repete enquanto nos nao encontramos o goal e ainda
+    # existem para serem expandidos na fronteira. Se
+    # acabarem os nos da fronteira antes do goal ser encontrado,
+    # entao ele nao eh alcancavel.
+    while (len(fronteira) > 0) and (goal_encontrado is None):
+        fronteira = sorted(fronteira, key=lambda x: x.distancia)
+        # seleciona o no mais antigo para ser expandido
+        no_atual = fronteira.pop(0)
+        expandidos.append(no_atual)
 
-        expandidos.add(no_atual)
+        # busca os vizinhos do no
+        vizinhos = celulas_vizinhas_livres(no_atual, labirinto)
 
-        for v in celulas_vizinhas_livres(no_atual, labirinto):
-            if v in expandidos:
-                continue
+        # para cada vizinho verifica se eh o goal e adiciona na
+        # fronteira se ainda nao foi expandido e nao esta na fronteira
+        for v in vizinhos:
 
-            tentative_g_score = g_score[no_atual] + distancia(no_atual, v)
-            if v not in g_score or tentative_g_score < g_score[v]:
-                origin[v] = no_atual
-                g_score[v] = tentative_g_score
-                f_score = tentative_g_score + heuristic(v, goal)
-                if not any(v == n for f, n in fronteira):
-                    fronteira.append((f_score, v))
+            if v.y == goal.y and v.x == goal.x:
+                if expandidos:
+                    cost = custo_caminhoAS(expandidos[0], expandidos[1:])
+                    if cost != inf:
+                        goal_encontrado = v
+                        break
+                else:
+                    goal_encontrado = v
+                    break
 
-    return [], len(expandidos)  # No path found
+            if v not in expandidos:
+                distance = distancia(v, goal)
+                v.distance = distance
+                fronteira.append(v)
+
+        if no_atual not in expandidos:
+            expandidos.append(no_atual)
+
+        viewer.update(generated=fronteira,
+                      expanded=expandidos)
+        #viewer.pause()
+
+
+    caminho = obtem_caminho(goal_encontrado)
+    custo   = custo_caminhoAS(caminho)
+
+    return caminho, custo, expandidos
+
+
+def custo_caminhoAS(caminho):
+    if len(caminho) == 0:
+        return inf
+
+    custo_total = 0
+    for i in range(1, len(caminho)):
+        custo_total += distancia(caminho[i].anterior, caminho[i]) + heuristic(caminho[i].anterior, caminho[i])
+
+    return custo_total
+
+def obtem_caminhoAS(goal, origin):
+    """ construi o caminho do goal para a origem. """
+    caminho = []
+    step = goal
+    while step is not None:
+        caminho.append(step)
+        step = origin.get(step)
+    caminho.reverse()  #caminho gerado do goal para a origem, então precisamos inverter
+    return caminho
 
 def heuristic(celula_1, celula_2):
     # Heurística de distância de Manhattan
     return abs(celula_1.x - celula_2.x) + abs(celula_1.y - celula_2.y)
-
-def distancia(celula_1, celula_2):
-    dx = celula_1.x - celula_2.x
-    dy = celula_1.y - celula_2.y
-    return sqrt(dx ** 2 + dy ** 2)
 
 
 def main():
     for _ in range(10):
         SEED = 21  # coloque None no lugar do 42 para deixar aleatorio
         #random.seed(SEED)
-        N_LINHAS  = 10
-        N_COLUNAS = 20
+        N_LINHAS  = 200 #10
+        N_COLUNAS = 200 #20
         INICIO = Celula(y=0, x=0, anterior=None)
         GOAL   = Celula(y=N_LINHAS-1, x=N_COLUNAS-1, anterior=None)
 
@@ -250,7 +291,7 @@ def main():
         labirinto = gera_labirinto(N_LINHAS, N_COLUNAS, INICIO, GOAL)
 
         viewer = MazeViewer(labirinto, INICIO, GOAL,
-                            step_time_miliseconds=20, zoom=40)
+                            step_time_miliseconds=1, zoom=10)
 
         #----------------------------------------
         # BFS Search
