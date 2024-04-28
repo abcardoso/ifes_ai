@@ -5,7 +5,7 @@ import heapq
 
 from collections import deque
 
-from sympy import true
+from sympy import false, true
 from viewer import MazeViewer
 from math import inf, sqrt
 
@@ -200,86 +200,6 @@ def depth_first_search(labirinto, inicio, goal, viewer):
     return caminho, custo, expandidos
 
 
-""" def a_star_search(labirinto, inicio, goal, viewer):
-    # nos gerados e que podem ser expandidos (vermelhos)
-    fronteira = []
-    # nos ja expandidos (amarelos)
-    expandidos = []
-
-    # adiciona o no inicial na fronteira
-    fronteira.append(inicio)
-
-    # variavel para armazenar o goal quando ele for encontrado.
-    goal_encontrado = None
-
-    # Repete enquanto nos nao encontramos o goal e ainda
-    # existem para serem expandidos na fronteira. Se
-    # acabarem os nos da fronteira antes do goal ser encontrado,
-    # entao ele nao eh alcancavel.
-    while (len(fronteira) > 0) and (goal_encontrado is None):
-        fronteira = sorted(fronteira, key=lambda x: x.distancia)
-        # seleciona o no mais antigo para ser expandido
-        no_atual = fronteira.pop(0)
-        expandidos.append(no_atual)
-
-        # busca os vizinhos do no
-        vizinhos = celulas_vizinhas_livres(no_atual, labirinto)
-
-        # para cada vizinho verifica se eh o goal e adiciona na
-        # fronteira se ainda nao foi expandido e nao esta na fronteira
-        for v in vizinhos:
-
-            if v.y == goal.y and v.x == goal.x:
-                if expandidos:
-                    cost = custo_caminhoAS(expandidos[0], expandidos[1:])
-                    if cost != inf:
-                        goal_encontrado = v
-                        break
-                else:
-                    goal_encontrado = v
-                    break
-
-            if v not in expandidos:
-                distance = distancia(v, goal)
-                v.distance = distance
-                fronteira.append(v)
-
-        if no_atual not in expandidos:
-            expandidos.append(no_atual)
-
-        if viewer:
-            viewer.update(generated=fronteira,
-                        expandidos=expandidos)
-            #viewer.pause()
-
-
-    caminho = obtem_caminho(goal_encontrado)
-    custo   = custo_caminhoAS(caminho)
-
-    return caminho, custo, expandidos
-
-
-def custo_caminhoAS(caminho):
-    if len(caminho) == 0:
-        return inf
-
-    custo_total = 0
-    for i in range(1, len(caminho)):
-        custo_total += distancia(caminho[i].anterior, caminho[i]) + heuristic(caminho[i].anterior, caminho[i])
-
-    return custo_total
-
-def obtem_caminhoAS(goal, origin):
-    #construi o caminho do goal para a origem. 
-    caminho = []
-    step = goal
-    while step is not None:
-        caminho.append(step)
-        step = origin.get(step)
-    caminho.reverse()  #caminho gerado do goal para a origem, então precisamos inverter
-    return caminho """
-
-
 def a_star_search(labirinto, inicio, goal, viewer):
     # Configuração inicial: cria uma lista de prioridades para a fronteira de busca
     open_set = []
@@ -346,9 +266,9 @@ def main():
     for _ in range(10):
         SEED = 21  # coloque None no lugar do 42 para deixar aleatorio
         #random.seed(SEED)
-        N_LINHAS  = 10 #10
-        N_COLUNAS = 20 #20
-        RENDER = true
+        N_LINHAS  = 200 #10
+        N_COLUNAS = 200 #20
+        RENDER = false
         INICIO = Celula(y=0, x=0, anterior=None)
         GOAL   = Celula(y=N_LINHAS-1, x=N_COLUNAS-1, anterior=None)
 
