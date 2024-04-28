@@ -302,7 +302,7 @@ def main():
             print("Goal é inalcançavel neste labirinto.")
 
         print(
-            f"BFS:"
+            f"BFS: {N_LINHAS} x {N_COLUNAS} \n" 
             f"\tTempo: {bfs_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
@@ -330,7 +330,7 @@ def main():
             print("Goal é inalcançavel neste labirinto.")
 
         print(
-            f"DFS:"
+            f"DFS: {N_LINHAS} x {N_COLUNAS} \n"
             f"\tTempo: {dfs_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
@@ -357,7 +357,7 @@ def main():
             print("Goal é inalcançavel neste labirinto.")
 
         print(
-            f"A-Star:"
+            f"A-Star: {N_LINHAS} x {N_COLUNAS} \n"
             f"\tTempo: {as_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
