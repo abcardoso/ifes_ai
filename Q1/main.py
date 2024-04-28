@@ -1,5 +1,6 @@
 
 import random
+import time 
 
 from collections import deque
 from viewer import MazeViewer
@@ -297,14 +298,18 @@ def main():
         # BFS Search
         #----------------------------------------
         viewer._figname = "BFS" 
+        bfs_start_time = time.time()
+        
         caminho, custo_total, expandidos = \
                 breadth_first_search(labirinto, INICIO, GOAL, viewer)
-
+        bfs_time = time.time() - bfs_start_time
+        
         if len(caminho) == 0:
             print("Goal é inalcançavel neste labirinto.")
 
         print(
             f"BFS:"
+            f"\tTempo: {bfs_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
             f"\tNumero total de nos expandidos: {len(expandidos)}.\n\n"
@@ -319,14 +324,17 @@ def main():
         # DFS Search
         #----------------------------------------
         viewer._figname = "DFS" 
+        dfs_start_time = time.time()
         caminho, custo_total, expandidos = \
                 depth_first_search(labirinto, INICIO, GOAL, viewer)
-
+        dfs_time = time.time() - dfs_start_time
+        
         if len(caminho) == 0:
             print("Goal é inalcançavel neste labirinto.")
 
         print(
             f"DFS:"
+            f"\tTempo: {dfs_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
             f"\tNumero total de nos expandidos: {len(expandidos)}.\n\n"
@@ -340,14 +348,17 @@ def main():
         # A-Star Search
         #----------------------------------------
         viewer._figname = "A_Star" 
+        as_start_time = time.time()
         caminho, custo_total, expandidos = \
                 a_star_search(labirinto, INICIO, GOAL, viewer)
-
+        as_time = time.time() - as_start_time
+        
         if len(caminho) == 0:
             print("Goal é inalcançavel neste labirinto.")
 
         print(
-            f"DFS:"
+            f"A-Star:"
+            f"\tTempo: {as_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
             f"\tNumero total de nos expandidos: {len(expandidos)}.\n\n"
