@@ -263,7 +263,7 @@ def heuristic(celula_1, celula_2):
 
 
 def main():
-    for _ in range(10):
+    for i in range(10):
         SEED = 21  # coloque None no lugar do 42 para deixar aleatorio
         #random.seed(SEED)
         N_LINHAS  = 200 #10
@@ -299,10 +299,11 @@ def main():
         bfs_time = time.time() - bfs_start_time
         
         if len(caminho) == 0:
-            print("Goal é inalcançavel neste labirinto.")
+            print(f"{i} - Goal é inalcançavel neste labirinto.")
+            continue
 
         print(
-            f"BFS: {N_LINHAS} x {N_COLUNAS} \n" 
+            f"{i} - BFS: {N_LINHAS} x {N_COLUNAS} \n" 
             f"\tTempo: {bfs_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
@@ -330,7 +331,7 @@ def main():
             print("Goal é inalcançavel neste labirinto.")
 
         print(
-            f"DFS: {N_LINHAS} x {N_COLUNAS} \n"
+            f"{i} - DFS: {N_LINHAS} x {N_COLUNAS} \n"
             f"\tTempo: {dfs_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
@@ -357,7 +358,7 @@ def main():
             print("Goal é inalcançavel neste labirinto.")
 
         print(
-            f"A-Star: {N_LINHAS} x {N_COLUNAS} \n"
+            f"{i} - A-Star: {N_LINHAS} x {N_COLUNAS} \n"
             f"\tTempo: {as_time}.\n"
             f"\tCusto total do caminho: {custo_total}.\n"
             f"\tNumero de passos: {len(caminho)-1}.\n"
