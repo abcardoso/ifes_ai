@@ -139,9 +139,10 @@ def breadth_first_search(labirinto, inicio, goal, viewer):
 
         expandidos.add(no_atual)
 
-        viewer.update(generated=fronteira,
-                      expanded=expandidos)
-        #viewer.pause()
+        if viewer:
+            viewer.update(generated=fronteira,
+                        expanded=expandidos)
+            #viewer.pause()
 
 
     caminho = obtem_caminho(goal_encontrado)
@@ -181,9 +182,10 @@ def depth_first_search(labirinto, inicio, goal, viewer):
                 if not esta_contido(expandidos, v) and not esta_contido(fronteira, v):
                     fronteira.append(v)  # usando append
 
-            # Atualiza o viewer (lembrar de comentar quando for gerar as estatísticas)
-            viewer.update(generated=fronteira, expanded=expandidos)
-            #viewer.pause()
+            if viewer:
+                # Atualiza o viewer 
+                viewer.update(generated=fronteira, expanded=expandidos)
+                #viewer.pause()
 
     # retrona as infos
     caminho = obtem_caminho(goal_encontrado)
@@ -239,9 +241,10 @@ def a_star_search(labirinto, inicio, goal, viewer):
         if no_atual not in expandidos:
             expandidos.append(no_atual)
 
-        viewer.update(generated=fronteira,
-                      expanded=expandidos)
-        #viewer.pause()
+        if viewer:
+            viewer.update(generated=fronteira,
+                        expanded=expandidos)
+            #viewer.pause()
 
 
     caminho = obtem_caminho(goal_encontrado)
@@ -279,8 +282,8 @@ def main():
     for _ in range(10):
         SEED = 21  # coloque None no lugar do 42 para deixar aleatorio
         #random.seed(SEED)
-        N_LINHAS  = 200 #10
-        N_COLUNAS = 200 #20
+        N_LINHAS  = 10 #10
+        N_COLUNAS = 20 #20
         INICIO = Celula(y=0, x=0, anterior=None)
         GOAL   = Celula(y=N_LINHAS-1, x=N_COLUNAS-1, anterior=None)
 
@@ -291,13 +294,17 @@ def main():
         """
         labirinto = gera_labirinto(N_LINHAS, N_COLUNAS, INICIO, GOAL)
 
-        viewer = MazeViewer(labirinto, INICIO, GOAL,
-                            step_time_miliseconds=1, zoom=10)
+        #norender viewer = MazeViewer(labirinto, INICIO, GOAL,
+        #norender                     step_time_miliseconds=1, zoom=10)
 
+        viewer = None #norender para não gastar tempo renderizando
+        
         #----------------------------------------
         # BFS Search
         #----------------------------------------
-        viewer._figname = "BFS" 
+        
+        #norender viewer._figname = "BFS" 
+        
         bfs_start_time = time.time()
         
         caminho, custo_total, expandidos = \
@@ -316,14 +323,15 @@ def main():
 
         )
 
-        viewer.update(path=caminho)
-        viewer.pause()
+        #norender viewer.update(path=caminho)
+        #norender viewer.pause()
 
 
         #----------------------------------------
         # DFS Search
         #----------------------------------------
-        viewer._figname = "DFS" 
+        #norender viewer._figname = "DFS" 
+        
         dfs_start_time = time.time()
         caminho, custo_total, expandidos = \
                 depth_first_search(labirinto, INICIO, GOAL, viewer)
@@ -341,13 +349,14 @@ def main():
 
         )
 
-        viewer.update(path=caminho)
-        viewer.pause()
+        #norender viewer.update(path=caminho)
+        #norender viewer.pause()
 
         #----------------------------------------
         # A-Star Search
         #----------------------------------------
-        viewer._figname = "A_Star" 
+        #norender viewer._figname = "A_Star" 
+        
         as_start_time = time.time()
         caminho, custo_total, expandidos = \
                 a_star_search(labirinto, INICIO, GOAL, viewer)
@@ -365,8 +374,8 @@ def main():
 
         )
 
-        viewer.update(path=caminho)
-        viewer.pause()
+        #norender viewer.update(path=caminho)
+        #norender viewer.pause()
         #----------------------------------------
         # Uniform Cost Search (Obs: opcional)
         #----------------------------------------
